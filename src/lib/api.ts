@@ -1,4 +1,3 @@
-
 import { DeezerSearchResponse, DeezerArtist, DeezerAlbum, DeezerPlaylist, DeezerTrack, JioSaavnSong, JioSaavnLyrics } from '../types/api';
 
 const DEEZER_API_HOST = 'deezerdevs-deezer.p.rapidapi.com';
@@ -35,7 +34,11 @@ export const getDeezerTrack = async (id: string): Promise<DeezerTrack> => {
   return deezerFetch(`/track/${id}`);
 };
 
-// JioSaavn API functions for music playback
+export const searchJioSaavnSongs = async (query: string) => {
+  const response = await fetch(`${JIOSAAVN_API_BASE}/search/songs?query=${encodeURIComponent(query)}`);
+  return response.json();
+};
+
 export const getJioSaavnSong = async (id: string): Promise<JioSaavnSong> => {
   const response = await fetch(`${JIOSAAVN_API_BASE}/songs/${id}`);
   return response.json();

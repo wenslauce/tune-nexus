@@ -20,19 +20,34 @@ export const MusicPlayer = ({ currentTrack }: MusicPlayerProps) => {
     if (currentTrack) {
       const fetchPlaybackUrl = async () => {
         try {
-          // Using JioSaavn API to get playback URL
-          const saavnSong = await getJioSaavnSong(currentTrack.title);
-          if (saavnSong.downloadUrl && saavnSong.downloadUrl.length > 0) {
-            setPlaybackUrl(saavnSong.downloadUrl[0]);
+          // First search for the song using title and artist
+          const searchQuery = `${currentTrack.title} ${currentTrack.artist.name}`;
+          const response = await fetch(`https://jiosaavn-sand.vercel.app/api/search/songs?query=${encodeURIComponent(searchQuery)}`);
+          const searchData = await response.json();
+          
+          if (searchData.data && searchData.data.length > 0) {
+            // Get the first matching song's details
+            const songId = searchData.data[0].id;
+            const songDetails = await getJioSaavnSong(songId);
+            
+            if (songDetails.downloadUrl && songDetails.downloadUrl.length > 0) {
+              setPlaybackUrl(songDetails.downloadUrl[0]);
+              return;
+            }
           }
+          
+          // Fallback to Deezer preview if JioSaavn search fails
+          console.log("Falling back to Deezer preview URL");
+          setPlaybackUrl(currentTrack.preview);
         } catch (error) {
           console.error("Error fetching playback URL:", error);
-          // Fallback to Deezer preview if JioSaavn fails
+          // Fallback to Deezer preview
           setPlaybackUrl(currentTrack.preview);
         }
       };
 
       fetchPlaybackUrl();
+      setIsPlaying(false);
     }
   }, [currentTrack]);
 
